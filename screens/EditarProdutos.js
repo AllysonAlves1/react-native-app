@@ -1,48 +1,44 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, SafeAreaView } from 'react-native';
-import { Header, Button, Icon } from 'react-native-elements';
+import { Header, Icon } from 'react-native-elements';
 import axios from 'axios';
+import FlashMessage, { showMessage } from "react-native-flash-message";
 
-export default function EditarContatos({ route, navigation }) {
+export default function EditarProdutos({ route, navigation }) {
 
-    function alterandoDados() {
-        alterarDados();
-        navigation.navigate('Lista de Contatos');
-    }
-
-    function excluindoDados() {
-        excluirDados();
-        navigation.navigate('Lista de Contatos');
-    }
-
+    const [Alert, setAlert] = useState(false);
     const [getNome, setNome] = useState('');
-    const [getEmail, setEmail] = useState('');
-    const [getTelefone, setTelefone] = useState('');
+    const [getCapacidade, setCapacidade] = useState('');
+    const [getPreco, setPreco] = useState('');
     const [getId, setId] = useState();
 
     useEffect(() => {
         if (route.params) {
             const { nome } = route.params;
-            const { email } = route.params;
-            const { telefone } = route.params;
+            const { capacidade } = route.params;
+            const { preco } = route.params;
             const { id } = route.params;
 
             setNome(nome);
-            setEmail(email);
-            setTelefone(telefone);
+            setCapacidade(capacidade);
+            setPreco(preco);
             setId(id);
         }
     }, [])
 
+
+
     function alterarDados() {
 
-        axios.put('http://professornilson.com/testeservico/clientes/' + getId
+        axios.put('http://localhost:5000/produtos/' + getId
             , {
                 nome: getNome,
-                email: getEmail,
-                telefone: getTelefone,
+                capacidade: getCapacidade,
+                preco: getPreco,
             }).then(function (response) {
+                setAlert(true);
+                showMessage({ message: "Produto Alterado!" });
                 console.log(response);
             }).catch(function (error) {
                 console.log(error);
@@ -52,13 +48,15 @@ export default function EditarContatos({ route, navigation }) {
 
     function excluirDados() {
 
-        axios.delete('http://professornilson.com/testeservico/clientes/' + getId)
+        axios.delete('http://localhost:5000/produtos/' + getId)
 
             .then(() => {
+                setAlert(true);
+                showMessage({ message: "Produto Excluído!" });
                 setNome(null);
-                setEmail(null);
-                setEmail(null);
-                setEmail(null);
+                setCapacidade(null);
+                setPreco(null);
+                setId(null);
             }).catch(function (error) {
                 console.log(error);
 
@@ -68,35 +66,35 @@ export default function EditarContatos({ route, navigation }) {
 
     return (
         <View style={styles.containerPrincipal}>
+            {Alert ? <FlashMessage position={"center"} /> : <></>}
             <Header
+                backgroundColor='gray'
                 placement="center"
-                centerComponent={{ text: 'Contato', style: { color: '#fff', fontSize: 24, fontWeight: '500' } }}
-                leftComponent={<Button icon={
-                    <Icon
-                        name="arrow-left"
-                        type='feather'
-                        size={24}
-                        color="white"
-                    />
-                }
-                    onPress={() => navigation.navigate('Lista de Contatos')} />}
+                centerComponent={{ text: 'Produto', style: { color: '#fff', fontSize: 24, fontWeight: '500' } }}
+                leftComponent={<Icon
+                    name="arrow-left"
+                    type='feather'
+                    size={30}
+                    color="white"
+                    onPress={() => navigation.navigate('Lista de Produtos')
+                    } />}
             />
             <View style={styles.container}>
                 <SafeAreaView>
                     <Text style={styles.formText}>Nome</Text>
                     <TextInput style={styles.input} onChangeText={text => setNome(text)} value={getNome} />
-                    <Text style={styles.formText}>Email</Text>
-                    <TextInput style={styles.input} onChangeText={text => setEmail(text)} value={getEmail} />
-                    <Text style={styles.formText}>Telefone</Text>
-                    <TextInput style={styles.input} onChangeText={text => setTelefone(text)} value={getTelefone} />
+                    <Text style={styles.formText}>Capacidade</Text>
+                    <TextInput style={styles.input} onChangeText={text => setCapacidade(text)} value={getCapacidade} />
+                    <Text style={styles.formText}>Preço (R$)</Text>
+                    <TextInput style={styles.input} onChangeText={text => setPreco(text)} value={getPreco} />
 
                     <TouchableOpacity
-                        style={styles.button1} onPress={() => alterandoDados()}>
+                        style={styles.button1} onPress={() => alterarDados()}>
                         <Text style={styles.textbutton}>Alterar</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={styles.button2} onPress={() => excluindoDados()}>
+                        style={styles.button2} onPress={() =>  excluirDados()}>
                         <Text style={styles.textbutton}>Excluir</Text>
                     </TouchableOpacity>
                 </SafeAreaView>
@@ -126,6 +124,7 @@ const styles = StyleSheet.create({
     formText: {
         fontSize: 20,
         marginBottom: 6,
+        fontWeight: '500'
     },
 
     button1: {

@@ -1,32 +1,52 @@
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, SafeAreaView } from 'react-native';
 import { Avatar } from 'react-native-elements';
+import axios from 'axios';
+
 
 export default function Login({ navigation }) {
+
+  const [loginUser, setloginEmail] = useState("");
+  const [loginPassword, setloginSenha] = useState("");
+
+  async function login() {
+    await axios.get(`http://localhost:5000/users/login/${loginUser}/${loginPassword}`,).then(function (response) {
+      console.log(response.data)
+      if (response.data?.length > 0) {
+        navigation.navigate('Lista de Produtos')
+      } else return
+    }).catch(function (error) {
+      console.log(error)
+    });
+  }
+
   return (
     <View style={styles.container}>
-        <Avatar
-          size={"xlarge"}
-          icon={{ name: "user-circle-o", type: "font-awesome", color: "#000", size: 120 }}
-        />
+      <Avatar
+        size={"xlarge"}
+        icon={{ name: "user-circle-o", type: "font-awesome", color: "#000", size: 120 }}
+      />
 
-        <SafeAreaView>
-          <Text style={styles.formText}>Login</Text>
-          <TextInput style={styles.input} />
-          <Text style={styles.formText}>Senha</Text>
-          <TextInput style={styles.input} />
+      <SafeAreaView>
+        <Text style={styles.formText}>Login</Text>
+        <TextInput style={styles.input} onChangeText={text => setloginEmail(text)} value={loginUser} />
+        <Text style={styles.formText}>Senha</Text>
+        <TextInput style={styles.input} onChangeText={text => setloginSenha(text)} value={loginPassword} secureTextEntry={true} />
 
-          <TouchableOpacity
-            style={styles.button1} onPress={() => navigation.navigate('Lista de Contatos')}>
-            <Text style={styles.textbutton}>Login</Text>
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button1} onPress={() => {
+            login()
+          }}>
+          <Text style={styles.textbutton}>Login</Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.button2} onPress={() => navigation.navigate('Usuário')}>
-            <Text style={styles.textbutton}>Cadastre-se</Text>
-          </TouchableOpacity>
-        </SafeAreaView>
-        <StatusBar style="auto" />
+        <TouchableOpacity
+          style={styles.button2} onPress={() => navigation.navigate('Register')}>
+          <Text style={styles.textbutton}>Cadastre-se</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+      <StatusBar style="auto" />
     </View>
   );
 }

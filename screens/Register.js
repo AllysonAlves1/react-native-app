@@ -1,34 +1,62 @@
+import React, { useState} from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, SafeAreaView } from 'react-native';
-import { Header, Button, Icon } from 'react-native-elements';
-import * as React from 'react';
+import { Header, Icon } from 'react-native-elements';
+import axios from 'axios';
+import FlashMessage, { showMessage } from "react-native-flash-message";
 
 export default function Register({ navigation }) {
+
+  const [Alert, setAlert] = useState(false);
+  const [registerNome, setRegisterNome] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerSenha, setRegisterSenha] = useState("");
+
+  async function cadastrarUsuario() {
+    await axios.post('http://localhost:5000/users/register',
+      {
+        username: registerNome,
+        email: registerEmail,
+        password: registerSenha
+      })
+      .then(function (response) {
+        console.log(response);
+        setAlert(true);
+        showMessage({ message: "Usuário Cadastrado!" });
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+
   return (
     <View style={styles.containerPrincipal} >
+      {Alert ? <FlashMessage position={"center"} /> : <></>}
       <Header
+        backgroundColor='gray'
         placement="center"
-        centerComponent={{ text: 'Usuário', style: { color: '#fff', fontSize: 24, fontWeight: '500' } }}
-        leftComponent={<Button icon={
-          <Icon
-            name="arrow-left"
-            type='feather'
-            size={24}
-            color="white"
-          />
-        }
-          onPress={() => navigation.navigate('Login')} />}
+        centerComponent={{ text: 'Cadastro de Usuário', style: { color: '#fff', fontSize: 24, fontWeight: '500' } }}
+        leftComponent={<Icon
+          name="arrow-left"
+          type='feather'
+          size={30}
+          color="white"
+          onPress={() => navigation.navigate('Login')
+          } />}
       />
       <View style={styles.container}>
         <SafeAreaView>
+          <Text style={styles.formText}>Nome</Text>
+          <TextInput style={styles.input} onChangeText={text => setRegisterNome(text)} value={registerNome} />
+
           <Text style={styles.formText}>Email</Text>
-          <TextInput style={styles.input} />
+          <TextInput style={styles.input} onChangeText={text => setRegisterEmail(text)} value={registerEmail} />
 
           <Text style={styles.formText}>Senha</Text>
-          <TextInput style={styles.input} />
+          <TextInput style={styles.input} onChangeText={text => setRegisterSenha(text)} value={registerSenha} />
 
           <TouchableOpacity
-            style={styles.button1} onPress={() => navigation.navigate('Login')}>
+            style={styles.button1} onPress={() =>cadastrarUsuario()}>
             <Text style={styles.textbutton}>Salvar</Text>
           </TouchableOpacity>
         </SafeAreaView>
